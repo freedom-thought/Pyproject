@@ -6,20 +6,19 @@ print(__doc__)
 # License: BSD
 
 
+import os
+
+import jieba
+import numpy as np
+from gensim.models import word2vec
 from keras import regularizers
-from keras.preprocessing import sequence
+from keras.layers import LSTM, Dropout, Dense, BatchNormalization
 from keras.layers.embeddings import Embedding
-from keras.layers import LSTM, GRU, Dropout, Dense, Flatten, Activation, GlobalAveragePooling1D, GlobalAveragePooling2D, \
-    GlobalAveragePooling3D
 from keras.models import Sequential
-import tensorflow as tf
+from keras.preprocessing import sequence
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import FeatureUnion
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-from gensim.models import word2vec
-import numpy as np
-import jieba
-import os
 
 
 def w2v_from_gensim(file_source_path):
@@ -281,6 +280,7 @@ def model2(word_vec2, label2, original_len):
     embedding_vector_length = 80
     drop_rate1 = 0.3
     drop_rate2 = 0.5
+    norm_momentum = 0.99
     recurrent_dropout = 0.5
     activatation_regularizer = 0.01
 
@@ -290,6 +290,10 @@ def model2(word_vec2, label2, original_len):
     model.add(Dropout(rate=drop_rate1))
     model.add(LSTM(80, use_bias=True, activation="softsign", recurrent_dropout=recurrent_dropout,
                    kernel_initializer="random_uniform", bias_initializer="zeros"))
+    model.add(BatchNormalization(axis=-1, momentum=norm_momentum, epsilon=0.001, center=True, scale=True,
+                                 beta_initializer='zeros', gamma_initializer='ones', moving_mean_initializer='zeros',
+                                 moving_variance_initializer='ones', beta_regularizer=None, gamma_regularizer=None,
+                                 beta_constraint=None, gamma_constraint=None))
     model.add(Dropout(drop_rate2))
     model.add(Dense(1, activation='sigmoid',
                     activity_regularizer=regularizers.l2(activatation_regularizer)))
