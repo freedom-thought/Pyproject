@@ -5,7 +5,7 @@ import calendar
 print(__doc__)
 
 # Encoding: utf-8
-# Author; Wang KM
+# Author; KM Wang
 
 
 import datetime
